@@ -256,6 +256,15 @@ app.get('/courseraw', async (req, res) => {
     res.json(feed);
 })
 
+app.post('/course/new', async (req, res) => {
+    const post = new Course({
+        course: req.body.course,
+        subjectDivision: req.body.subjectDivision,
+    });
+    post.save();
+    res.json(post);
+})
+
 app.post('/feed/new', async (req, res) => {
     const feed = await Course.find();
     let subjectList = new Array(feed.length);
