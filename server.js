@@ -953,6 +953,65 @@ app.delete('/feed/delete/:id', async (req, res) => {
     }
   });
 
+  app.delete('/course/delete', async (req, res) => {
+
+    let memberList = await Post.find();
+    let memberListCheck = new Array(memberList.length).fill(false);
+
+    let courseList = await Course.find();
+
+    for (let i = 0; i < req.query.checkedList.length; i++)
+    {
+        if (req.query.checkedList[i] === 'true')
+        {
+            if (courseList[i].course === req.query.course[i])
+            {
+                const post = await Course.findByIdAndDelete(courseList[i]._id);
+                for (let k = 0; k < memberList.length; k++)
+                {
+                    if (memberList[k].subject.includes(post.course))
+                    {
+                        memberList[k].subject = memberList[k].subject.replace("{" + post.course + "}", "");
+                        memberListCheck[k] = true;
+                    }
+                }
+            }
+            else
+            {
+                for (let j = 0; j < courseList.length; j++)
+                {
+                    if (courseList[j].course === req.query.course[i])
+                    {
+                        const post = await Course.findByIdAndDelete(courseList[j]._id);
+                        for (let k = 0; k < memberList.length; k++)
+                        {
+                            if (memberList[k].subject.includes(post.course))
+                            {
+                                memberList[k].subject = memberList[k].subject.replace("{" + post.course + "}", "");
+                                memberListCheck[k] = true;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < memberListCheck.length; i++)
+    {
+        if (memberListCheck[i])
+        {
+            const postMembers = await Post.findByIdAndUpdate(memberList[i]._id, {
+                subject: memberList[i].subject,
+                }, { new: true });
+            postMembers.save();
+        }
+    }
+
+    res.json('Post deleted successfully');
+  })
+
   app.delete('/delete/appointment', async(req,res) => {
 
     let memberList = await Post.find();
