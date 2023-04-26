@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-connection = "mongodb+srv://KevinTang:0hmlsVIAJwbjWuTf@axs-tutoring.c24c5cd.mongodb.net/?retryWrites=true&w=majority";//2xvy-BTPm7zNyvj
 const crypto = require('crypto-js');
 const nodemailer = require('nodemailer');
+const Dotenv = require("dotenv").config(); //create a .env file containing the passwords if running the code locally
+const connection = "mongodb+srv://KevinTang:" + process.env.M_PASSWORD + "@axs-tutoring.c24c5cd.mongodb.net/?retryWrites=true&w=majority";
 
 const tutoringChairs = "Arthur Huang and Claire Luong";
 
@@ -11,26 +12,30 @@ const transporter = nodemailer.createTransport( {
     service: "Zoho",
     auth: {
         user: "axstutoring@zohomail.com",
-        pass: "Rs5m4zTPmncNsxZ"
+        pass: process.env.E_PASSWORD
     }
 });
 
-mongoose.set('strictQuery', false);
+const connectDB = async () => {
+    mongoose.set('strictQuery', false);
 
-mongoose
-    .connect (connection, 
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        })
-        .then(() => console.log("Connected to DB"))
-        .catch(console.error);
+    await mongoose
+        .connect (connection, 
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+            })
+            .then(() => console.log("Connected to DB"))
+            .catch(console.error);
+}
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.listen(8080, () => {console.log("Server listening on port 8080");})
+connectDB().then(() => {
+    app.listen(8080, () => {console.log("Server listening on port 8080");});
+})
 
 const Post = require("./models/post");
 const Course = require("./models/course");
